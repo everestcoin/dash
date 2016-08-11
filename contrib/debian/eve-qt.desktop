@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Eve
+Comment=Eve P2P Cryptocurrency
+Comment[fr]=Eve, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Eve, eşten eşe kriptografik sanal para birimi
+Exec=eve-qt %u
+Terminal=false
+Type=Application
+Icon=eve128
+MimeType=x-scheme-handler/eve;
+Categories=Office;Finance;

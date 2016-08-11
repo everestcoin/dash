@@ -1,0 +1,27 @@
+# /etc/conf.d/eved: config file for /etc/init.d/eved
+
+# Config file location
+#BITCOIND_CONFIGFILE="/etc/eve/eve.conf"
+
+# What directory to write pidfile to?  (created and owned by $BITCOIND_USER)
+#BITCOIND_PIDDIR="/var/run/eved"
+
+# What filename to give the pidfile
+#BITCOIND_PIDFILE="${BITCOIND_PIDDIR}/eved.pid"
+
+# Where to write eved data (be mindful that the blockchain is large)
+#BITCOIND_DATADIR="/var/lib/eved"
+
+# User and group to own eved process
+#BITCOIND_USER="eve"
+#BITCOIND_GROUP="eve"
+
+# Path to eved executable
+#BITCOIND_BIN="/usr/bin/eved"
+
+# Nice value to run eved under
+#BITCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+BITCOIND_OPTS="-disablewallet"
+

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 #
-# Use the raw transactions API to spend dashs received on particular addresses,
+# Use the raw transactions API to spend eves received on particular addresses,
 # and send any change back to that same address.
 #
 # Example usage:
 #  spendfrom.py  # Lists available funds
 #  spendfrom.py --from=ADDRESS --to=ADDRESS --amount=11.00
 #
-# Assumes it will talk to a dashd or Dash-Qt running
+# Assumes it will talk to a eved or Eve-Qt running
 # on localhost.
 #
 # Depends on jsonrpc
@@ -33,15 +33,15 @@ def check_json_precision():
         raise RuntimeError("JSON encode/decode loses precision")
 
 def determine_db_dir():
-    """Return the default location of the dash data directory"""
+    """Return the default location of the eve data directory"""
     if platform.system() == "Darwin":
-        return os.path.expanduser("~/Library/Application Support/Dash/")
+        return os.path.expanduser("~/Library/Application Support/Eve/")
     elif platform.system() == "Windows":
-        return os.path.join(os.environ['APPDATA'], "Dash")
-    return os.path.expanduser("~/.dash")
+        return os.path.join(os.environ['APPDATA'], "Eve")
+    return os.path.expanduser("~/.eve")
 
 def read_bitcoin_config(dbdir):
-    """Read the dash.conf file from dbdir, returns dictionary of settings"""
+    """Read the eve.conf file from dbdir, returns dictionary of settings"""
     from ConfigParser import SafeConfigParser
 
     class FakeSecHead(object):
@@ -59,20 +59,20 @@ def read_bitcoin_config(dbdir):
                 return s
 
     config_parser = SafeConfigParser()
-    config_parser.readfp(FakeSecHead(open(os.path.join(dbdir, "dash.conf"))))
+    config_parser.readfp(FakeSecHead(open(os.path.join(dbdir, "eve.conf"))))
     return dict(config_parser.items("all"))
 
 def connect_JSON(config):
-    """Connect to a dash JSON-RPC server"""
+    """Connect to a eve JSON-RPC server"""
     testnet = config.get('testnet', '0')
     testnet = (int(testnet) > 0)  # 0/1 in config file, convert to True/False
     if not 'rpcport' in config:
-        config['rpcport'] = 19998 if testnet else 9998
+        config['rpcport'] = 19886 if testnet else 9886
     connect = "http://%s:%s@127.0.0.1:%s"%(config['rpcuser'], config['rpcpassword'], config['rpcport'])
     try:
         result = ServiceProxy(connect)
         # ServiceProxy is lazy-connect, so send an RPC command mostly to catch connection errors,
-        # but also make sure the dashd we're talking to is/isn't testnet:
+        # but also make sure the eved we're talking to is/isn't testnet:
         if result.getmininginfo()['testnet'] != testnet:
             sys.stderr.write("RPC server at "+connect+" testnet setting mismatch\n")
             sys.exit(1)
@@ -81,36 +81,36 @@ def connect_JSON(config):
         sys.stderr.write("Error connecting to RPC server at "+connect+"\n")
         sys.exit(1)
 
-def unlock_wallet(dashd):
-    info = dashd.getinfo()
+def unlock_wallet(eved):
+    info = eved.getinfo()
     if 'unlocked_until' not in info:
         return True # wallet is not encrypted
     t = int(info['unlocked_until'])
     if t <= time.time():
         try:
             passphrase = getpass.getpass("Wallet is locked; enter passphrase: ")
-            dashd.walletpassphrase(passphrase, 5)
+            eved.walletpassphrase(passphrase, 5)
         except:
             sys.stderr.write("Wrong passphrase\n")
 
-    info = dashd.getinfo()
+    info = eved.getinfo()
     return int(info['unlocked_until']) > time.time()
 
-def list_available(dashd):
+def list_available(eved):
     address_summary = dict()
 
     address_to_account = dict()
-    for info in dashd.listreceivedbyaddress(0):
+    for info in eved.listreceivedbyaddress(0):
         address_to_account[info["address"]] = info["account"]
 
-    unspent = dashd.listunspent(0)
+    unspent = eved.listunspent(0)
     for output in unspent:
         # listunspent doesn't give addresses, so:
-        rawtx = dashd.getrawtransaction(output['txid'], 1)
+        rawtx = eved.getrawtransaction(output['txid'], 1)
         vout = rawtx["vout"][output['vout']]
         pk = vout["scriptPubKey"]
 
-        # This code only deals with ordinary pay-to-dash-address
+        # This code only deals with ordinary pay-to-eve-address
         # or pay-to-script-hash outputs right now; anything exotic is ignored.
         if pk["type"] != "pubkeyhash" and pk["type"] != "scripthash":
             continue
@@ -139,8 +139,8 @@ def select_coins(needed, inputs):
         n += 1
     return (outputs, have-needed)
 
-def create_tx(dashd, fromaddresses, toaddress, amount, fee):
-    all_coins = list_available(dashd)
+def create_tx(eved, fromaddresses, toaddress, amount, fee):
+    all_coins = list_available(eved)
 
     total_available = Decimal("0.0")
     needed = amount+fee
@@ -159,7 +159,7 @@ def create_tx(dashd, fromaddresses, toaddress, amount, fee):
     # Note:
     # Python's json/jsonrpc modules have inconsistent support for Decimal numbers.
     # Instead of wrestling with getting json.dumps() (used by jsonrpc) to encode
-    # Decimals, I'm casting amounts to float before sending them to dashd.
+    # Decimals, I'm casting amounts to float before sending them to eved.
     #
     outputs = { toaddress : float(amount) }
     (inputs, change_amount) = select_coins(needed, potential_inputs)
@@ -170,8 +170,8 @@ def create_tx(dashd, fromaddresses, toaddress, amount, fee):
         else:
             outputs[change_address] = float(change_amount)
 
-    rawtx = dashd.createrawtransaction(inputs, outputs)
-    signed_rawtx = dashd.signrawtransaction(rawtx)
+    rawtx = eved.createrawtransaction(inputs, outputs)
+    signed_rawtx = eved.signrawtransaction(rawtx)
     if not signed_rawtx["complete"]:
         sys.stderr.write("signrawtransaction failed\n")
         sys.exit(1)
@@ -179,10 +179,10 @@ def create_tx(dashd, fromaddresses, toaddress, amount, fee):
 
     return txdata
 
-def compute_amount_in(dashd, txinfo):
+def compute_amount_in(eved, txinfo):
     result = Decimal("0.0")
     for vin in txinfo['vin']:
-        in_info = dashd.getrawtransaction(vin['txid'], 1)
+        in_info = eved.getrawtransaction(vin['txid'], 1)
         vout = in_info['vout'][vin['vout']]
         result = result + vout['value']
     return result
@@ -193,12 +193,12 @@ def compute_amount_out(txinfo):
         result = result + vout['value']
     return result
 
-def sanity_test_fee(dashd, txdata_hex, max_fee):
+def sanity_test_fee(eved, txdata_hex, max_fee):
     class FeeError(RuntimeError):
         pass
     try:
-        txinfo = dashd.decoderawtransaction(txdata_hex)
-        total_in = compute_amount_in(dashd, txinfo)
+        txinfo = eved.decoderawtransaction(txdata_hex)
+        total_in = compute_amount_in(eved, txinfo)
         total_out = compute_amount_out(txinfo)
         if total_in-total_out > max_fee:
             raise FeeError("Rejecting transaction, unreasonable fee of "+str(total_in-total_out))
@@ -221,15 +221,15 @@ def main():
 
     parser = optparse.OptionParser(usage="%prog [options]")
     parser.add_option("--from", dest="fromaddresses", default=None,
-                      help="addresses to get dashs from")
+                      help="addresses to get eves from")
     parser.add_option("--to", dest="to", default=None,
-                      help="address to get send dashs to")
+                      help="address to get send eves to")
     parser.add_option("--amount", dest="amount", default=None,
                       help="amount to send")
     parser.add_option("--fee", dest="fee", default="0.0",
                       help="fee to include")
     parser.add_option("--datadir", dest="datadir", default=determine_db_dir(),
-                      help="location of dash.conf file with RPC username/password (default: %default)")
+                      help="location of eve.conf file with RPC username/password (default: %default)")
     parser.add_option("--testnet", dest="testnet", default=False, action="store_true",
                       help="Use the test network")
     parser.add_option("--dry_run", dest="dry_run", default=False, action="store_true",
@@ -240,10 +240,10 @@ def main():
     check_json_precision()
     config = read_bitcoin_config(options.datadir)
     if options.testnet: config['testnet'] = True
-    dashd = connect_JSON(config)
+    eved = connect_JSON(config)
 
     if options.amount is None:
-        address_summary = list_available(dashd)
+        address_summary = list_available(eved)
         for address,info in address_summary.iteritems():
             n_transactions = len(info['outputs'])
             if n_transactions > 1:
@@ -253,14 +253,14 @@ def main():
     else:
         fee = Decimal(options.fee)
         amount = Decimal(options.amount)
-        while unlock_wallet(dashd) == False:
+        while unlock_wallet(eved) == False:
             pass # Keep asking for passphrase until they get it right
-        txdata = create_tx(dashd, options.fromaddresses.split(","), options.to, amount, fee)
-        sanity_test_fee(dashd, txdata, amount*Decimal("0.01"))
+        txdata = create_tx(eved, options.fromaddresses.split(","), options.to, amount, fee)
+        sanity_test_fee(eved, txdata, amount*Decimal("0.01"))
         if options.dry_run:
             print(txdata)
         else:
-            txid = dashd.sendrawtransaction(txdata)
+            txid = eved.sendrawtransaction(txdata)
             print(txid)
 
 if __name__ == '__main__':

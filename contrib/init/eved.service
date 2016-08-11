@@ -1,0 +1,22 @@
+[Unit]
+Description=Eve's distributed currency daemon
+After=network.target
+
+[Service]
+User=eve
+Group=eve
+
+Type=forking
+PIDFile=/var/lib/eved/eved.pid
+ExecStart=/usr/bin/eved -daemon -pid=/var/lib/eved/eved.pid \
+-conf=/etc/eve/eve.conf -datadir=/var/lib/eved -disablewallet
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

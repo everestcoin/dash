@@ -1,4 +1,4 @@
-Dash Core 0.12.0
+Eve Core 0.12.0
 =====================
 
 Setup
@@ -7,46 +7,46 @@ Setup
 
 Running
 ---------------------
-The following are some helpful notes on how to run Dash on your native platform.
+The following are some helpful notes on how to run Eve on your native platform.
 
 ### Unix
 
-You need the Qt4 run-time libraries to run Dash-Qt. On Debian or Ubuntu:
+You need the Qt4 run-time libraries to run Eve-Qt. On Debian or Ubuntu:
 
 	sudo apt-get install libqtgui4
 
 Unpack the files into a directory and run:
 
-- bin/32/dash-qt (GUI, 32-bit) or bin/32/dashd (headless, 32-bit)
-- bin/64/dash-qt (GUI, 64-bit) or bin/64/dashd (headless, 64-bit)
+- bin/32/eve-qt (GUI, 32-bit) or bin/32/eved (headless, 32-bit)
+- bin/64/eve-qt (GUI, 64-bit) or bin/64/eved (headless, 64-bit)
 
 
 
 ### Windows
 
-Unpack the files into a directory, and then run dash-qt.exe.
+Unpack the files into a directory, and then run eve-qt.exe.
 
 ### OSX
 
-Drag Dash-Qt to your applications folder, and then run Dash-Qt.
+Drag Eve-Qt to your applications folder, and then run Eve-Qt.
 
 ### Need Help?
 
-* See the documentation at the [Dash Wiki](https://en.bitcoin.it/wiki/Main_Page) ***TODO***
+* See the documentation at the [Eve Wiki](https://en.bitcoin.it/wiki/Main_Page) ***TODO***
 for help and more information.
-* Ask for help on [#dashpay](http://webchat.freenode.net?channels=dashpay) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=dashpay).
-* Ask for help on the [DashTalk](https://dashtalk.org/) forums.
+* Ask for help on [#everestcoin](http://webchat.freenode.net?channels=everestcoin) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=everestcoin).
+* Ask for help on the [EveTalk](https://evetalk.org/) forums.
 
 Building
 ---------------------
-The following are developer notes on how to build Dash on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build Eve on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
 - [OSX Build Notes](build-osx.md)
 - [Unix Build Notes](build-unix.md)
 
 Development
 ---------------------
-The Dash repo's [root README](https://github.com/everestcoin/eve/blob/master/README.md) contains relevant information on the development process and automated testing.
+The Eve repo's [root README](https://github.com/everestcoin/eve/blob/master/README.md) contains relevant information on the development process and automated testing.
 
 - [Coding Guidelines](coding.md)
 - [Multiwallet Qt Development](multiwallet-qt.md)
@@ -57,8 +57,8 @@ The Dash repo's [root README](https://github.com/everestcoin/eve/blob/master/REA
 - [Unit Tests](unit-tests.md)
 
 ### Resources
-* Discuss on the [DashTalk](https://dashtalk.org/) forums, in the Development & Technical Discussion board.
-* Discuss on [#dashpay](http://webchat.freenode.net/?channels=dashpay) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net/?channels=dashpay).
+* Discuss on the [EveTalk](https://evetalk.org/) forums, in the Development & Technical Discussion board.
+* Discuss on [#everestcoin](http://webchat.freenode.net/?channels=everestcoin) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net/?channels=everestcoin).
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
